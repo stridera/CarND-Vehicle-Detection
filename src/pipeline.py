@@ -10,15 +10,17 @@ from Classifier import Classifier
 from matplotlib import pyplot
 
 class CarFindingPipeline():
-	def __init__(self, search_window):
+	def __init__(self, train_classifier=False):
 		self.iu = Image_Utils()
-		self.classifier = Classifier(True)
+		self.classifier = Classifier(train_classifier)
 		self.sws = Sliding_Window_Search(
-			search_window=search_window,
 			validator=self.process_image,
 			on_valid=self.draw_squares,
 			extra_params={'visualize':True, 'save_frame':False}
 		)
+
+	def update_search_window(self, search_window):
+		self.sws.set_search_window(search_window)
 
 	def draw_squares(self, image, top_left, bottom_right, color=(0, 0, 255), 
 	thickness=5, frame=0, visualize=True, save_frame=False):
@@ -70,6 +72,8 @@ def processTestImages():
 
 	images = glob.glob('../test_images/*')
 
+	pipeline = CarFindingPipeline(True)
+
 	cols = len(images)
 	for i, imgPath in enumerate(images):
 		image = cv2.imread(imgPath)
@@ -80,7 +84,7 @@ def processTestImages():
 			(0, rgb_image.shape[0] * 0.45), 
 			(rgb_image.shape[1], rgb_image.shape[0] * 0.95))
 
-		pipeline = CarFindingPipeline(search_window)
+		pipeline.update_search_window(search_window)
 		processedImage = pipeline.process(rgb_image)
 
 		# r,g,b = cv2.split(processedImage)

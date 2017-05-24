@@ -18,6 +18,9 @@ class Sliding_Window_Search():
 		self.window = 0
 		self.extra_params = extra_params
 
+	def set_search_window(self, search_window):
+		self.search_window = search_window
+		
 	def process(self, image):
 		current_window_size = self.window_size_max
 		min_x, min_y = self.search_window[0]

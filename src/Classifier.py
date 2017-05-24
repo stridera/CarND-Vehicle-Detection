@@ -42,7 +42,6 @@ class Classifier:
 		# Create an array stack of feature vectors
 		X = np.vstack((vehicles_features, non_vehicles_features)).astype(np.float64)                        
 		# Fit a per-column scaler
-		print(X.shape)
 		X_scaler = StandardScaler().fit(X)
 		# Apply the scaler to X
 		scaled_X = X_scaler.transform(X)
@@ -69,17 +68,20 @@ class Classifier:
 		
 		# Check the prediction time for a single sample
 		t=time.time()
-		n_predict = 10
-		print('My SVC predicts: ', self.svc.predict(X_test[0:n_predict]))
-		print('For these',n_predict, 'labels: ', y_test[0:n_predict])
+		n_predict = 100
+		test = self.svc.predict(X_test[0:n_predict])
 		t2 = time.time()
 		print(round(t2-t, 5), 'Seconds to predict', n_predict,'labels with SVC')
+		print("Accuracy:", test.score(y_test))
 
 		with open(self.data_path, "wb") as f:
 			pickle.dump(self.svc, f)
 
 	def predict(self, image):
 		return self.svc.predict(image)
+
+	def score(self, X, y):
+		return self.svc.score(X, y)
 
 if __name__ == '__main__':
 	train = False
@@ -106,16 +108,14 @@ if __name__ == '__main__':
 	for image in non_vehicles:
 		non_vehicle_features.append(image_utils.extract_features_from_image(mpimg.imread(image)))
 
-	prediction = classifier.predict(non_vehicle_features)
-	incorrect = np.count_nonzero(prediction)
-	print(incorrect, "of", len(non_vehicle_features), 'failed')
-
-
 	vehicle_features = []
 	for image in vehicles:
 		vehicle_features.append(image_utils.extract_features_from_image(mpimg.imread(image)))
 
-	prediction = classifier.predict(vehicle_features)
-	correct = np.count_nonzero(prediction)
-	print(correct, "of", len(vehicle_features), 'passed')
+	X = np.vstack((vehicle_features, non_vehicle_features)).astype(np.float64)   
+	y = np.hstack((np.ones(len(vehicle_features)), np.zeros(len(non_vehicle_features))))
+
+	accuracy = classifier.score(X, y)
+	print('Accuracy:', accuracy)
+
 

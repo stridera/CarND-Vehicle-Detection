@@ -12,8 +12,12 @@ class Image_Utils():
 		for file in images:
 			# Read in each one by one
 			image = mpimg.imread(file)
+
+			# Resize Image
+			resized = cv2.resize(image, (64, 64))
+
 			# apply color conversion if other than 'RGB'
-			color_converted_image = self.convert_color_space(image, cspace)
+			color_converted_image = self.convert_color_space(resized, cspace)
 			
 			# Get hog features
 			hog_features = self.get_image_hog_feature(color_converted_image, hog_channel)
@@ -25,7 +29,8 @@ class Image_Utils():
 		return features
 
 	def extract_features_from_image(self, image, cspace='RGB', hog_channel=None):
-		color_converted_image = self.convert_color_space(image, cspace)
+		resized = cv2.resize(image, (64, 64))		
+		color_converted_image = self.convert_color_space(resized, cspace)
 		return self.get_image_hog_feature(color_converted_image, hog_channel)
 
 	def convert_color_space(self, image, cspace):

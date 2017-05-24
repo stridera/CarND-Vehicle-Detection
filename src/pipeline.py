@@ -5,13 +5,51 @@ from moviepy.editor import VideoFileClip
 
 from Sliding_Window_Search import Sliding_Window_Search
 from Image_Utils import Image_Utils
+from Classifier import Classifier
+
+from matplotlib import pyplot
 
 class CarFindingPipeline():
-	def __init__(self):
-		''' blah '''
+	def __init__(self, search_window):
+		self.iu = Image_Utils()
+		self.classifier = Classifier(True)
+		self.sws = Sliding_Window_Search(
+			search_window=search_window,
+			validator=self.process_image,
+			on_valid=self.draw_squares,
+			extra_params={'visualize':True, 'save_frame':False}
+		)
+
+	def draw_squares(self, image, top_left, bottom_right, color=(0, 0, 255), 
+	thickness=5, frame=0, visualize=True, save_frame=False):
+		if save_frame:
+			cp = np.copy(image)
+			cv2.rectangle(cp, top_left, bottom_right, color, thickness)
+			r,g,b = cv2.split(cp)
+			bgrImage = cv2.merge([b,g,r])
+			cv2.imwrite('../output_images/blah{}.png'.format(str(frame).zfill(3)), bgrImage)
+		if visualize:
+			cv2.rectangle(image, top_left, bottom_right, color, thickness)
+
+		return image
+
+	def process_image(self, frame):
+		features = self.iu.extract_features_from_image(frame)
+		results = self.classifier.predict([features])
+
+		if results[0] == 1:	
+			print "CAR!"
+		# 	title = "Car"
+		# else:
+		# 	title = "No Car"
+		# pyplot.imshow(frame)
+		# pyplot.title(title)
+		# pyplot.show()
+		
+		return results[0] == 1
 
 	def process(self, frame):
-
+		self.sws.process(frame)
 		return frame
 
 
@@ -36,10 +74,14 @@ def processTestImages():
 	for i, imgPath in enumerate(images):
 		image = cv2.imread(imgPath)
 		b,g,r = cv2.split(image)
-		rgbImage = cv2.merge([r,g,b])
+		rgb_image = cv2.merge([r,g,b])
 
-		pipeline = CarFindingPipeline(True)
-		processedImage = pipeline.process(rgbImage)
+		search_window = (
+			(0, rgb_image.shape[0] * 0.45), 
+			(rgb_image.shape[1], rgb_image.shape[0] * 0.95))
+
+		pipeline = CarFindingPipeline(search_window)
+		processedImage = pipeline.process(rgb_image)
 
 		# r,g,b = cv2.split(processedImage)
 		# bgrImage = cv2.merge([b,g,r])
@@ -48,7 +90,7 @@ def processTestImages():
 		pyplot.subplot(121)
 		pyplot.axis('off')
 		pyplot.title(imgPath)
-		pyplot.imshow(rgbImage)
+		pyplot.imshow(rgb_image)
 		pyplot.subplot(122)
 		pyplot.title("{}, {}".format(cols*2, (i*2)))
 		pyplot.imshow(processedImage)
@@ -56,7 +98,7 @@ def processTestImages():
 		pyplot.tight_layout()
 		pyplot.show()
 
-		break
+		# break
 
 
 def main():

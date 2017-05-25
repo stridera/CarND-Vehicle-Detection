@@ -40,7 +40,7 @@ class CarFindingPipeline():
 		results = self.classifier.predict([features])
 
 		if results[0] == 1:	
-			print "CAR!"
+			print("CAR!")
 		# 	title = "Car"
 		# else:
 		# 	title = "No Car"
@@ -72,7 +72,7 @@ def processTestImages():
 
 	images = glob.glob('../test_images/*')
 
-	pipeline = CarFindingPipeline(True)
+	pipeline = CarFindingPipeline()
 
 	cols = len(images)
 	for i, imgPath in enumerate(images):

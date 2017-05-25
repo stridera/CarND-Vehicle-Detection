@@ -20,7 +20,7 @@ class Classifier:
 			self.train_classifier()
 		else:
 			with open(self.data_path, "rb") as f:
-				self.svc = pickle.load(f)
+				self.svc = pickle.load(f, encoding='utf-8')
 
 	def train_classifier(self):
 		print("Training")
@@ -72,7 +72,7 @@ class Classifier:
 		test = self.svc.predict(X_test[0:n_predict])
 		t2 = time.time()
 		print(round(t2-t, 5), 'Seconds to predict', n_predict,'labels with SVC')
-		print("Accuracy:", test.score(y_test))
+		print("Accuracy:", self.score(X_test[0:n_predict], y_test[0:n_predict]))
 
 		with open(self.data_path, "wb") as f:
 			pickle.dump(self.svc, f)
@@ -100,9 +100,9 @@ if __name__ == '__main__':
 	# vehicle_image = image_utils.extract_features_from_image(mpimg.imread(vehicles[10]), hog_channel=0)
 	# non_vehicle_image = image_utils.extract_features_from_image(mpimg.imread(non_vehicles[10]), hog_channel=0)
 	
-	sample_size = 1000
-	vehicles = vehicles[0:sample_size]
-	non_vehicles = non_vehicles[0:sample_size]
+	#sample_size = 1000
+	#vehicles = vehicles[0:sample_size]
+	#non_vehicles = non_vehicles[0:sample_size]
 
 	non_vehicle_features = []
 	for image in non_vehicles:

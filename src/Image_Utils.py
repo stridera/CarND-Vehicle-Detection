@@ -109,4 +109,4 @@ if __name__ == '__main__':
 	images = glob.glob('../test_images/*')
 
 	image_utils = Image_Utils()
-	print image_utils.extract_features(images, 2)
+	print(image_utils.extract_features(images, 2))

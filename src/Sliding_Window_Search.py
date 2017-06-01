@@ -4,8 +4,8 @@ import numpy as np
 import cv2
 
 class Sliding_Window_Search():
-	def __init__(self, window_size_min=(50, 50), window_size_max=(350, 350), window_size_steps=(50, 50),
-		search_window=None, window_overlap=(0.5, 0.5), validator=None, on_valid=None, on_invalid=None, extra_params=None):
+	def __init__(self, window_size_min=(64, 64), window_size_max=(384, 384), window_size_steps=(64, 64),
+		search_window=None, window_overlap=(0.25, 0.25), validator=None, on_valid=None, on_invalid=None, extra_params=None):
 
 		self.window_size_min = window_size_min
 		self.window_size_max = window_size_max
@@ -20,7 +20,7 @@ class Sliding_Window_Search():
 
 	def set_search_window(self, search_window):
 		self.search_window = search_window
-		
+
 	def process(self, image):
 		current_window_size = self.window_size_max
 		min_x, min_y = self.search_window[0]
@@ -51,6 +51,9 @@ class Sliding_Window_Search():
 		return image
 
 	def check_window(self, image, top_left, bottom_right):
+		if (image is None):
+			print "Error, no image sent!"
+			return
 		if (self.validator is not None):
 			x1, y2 = top_left
 			x2, y1 = bottom_right
@@ -60,16 +63,18 @@ class Sliding_Window_Search():
 				if self.on_valid is not None:
 					self.window += 1
 					i = self.window
-					image =  self.on_valid(image, top_left, bottom_right, **self.extra_params)
+					image =  self.on_valid(image, cropped_image, top_left, bottom_right, **self.extra_params)
 			else:
 				if self.on_invalid is not None:
-					image = self.on_invalid(image, top_left, bottom_right, **self.extra_params)
-
+					self.on_invalid(image, cropped_image, top_left, bottom_right, **self.extra_params)
+		else:
+			print("No Validator")
+			
 		return image
 
 # Tests
 
-def draw_squares(image, top_left, bottom_right, color=(0, 0, 255), 
+def draw_squares(image, cropped, top_left, bottom_right, color=(0, 0, 255), 
 	thickness=5, frame=0, visualize=True, save_frame=False):
 	if save_frame:
 		cp = np.copy(image)

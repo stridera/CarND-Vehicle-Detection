@@ -70,15 +70,17 @@ class Image_Utils():
 				image = cv2.cvtColor(image, cv2.COLOR_BGR2YCR_CB)
 		return image
 
-	def get_image_hog_feature(self, image):
+	def get_image_hog_feature(self, image, visualise=False):
 		# Call get_hog_features() with vis=False, feature_vec=True
+		print("Hog Channel:", self.hog_channel)
+
 		if self.hog_channel is None:
 			hog_features = []
 			for channel in range(image.shape[2]):
-				hog_features.append(self.get_hog_features(image[:,:,channel], visualise=False))
+				hog_features.append(self.get_hog_features(image[:,:,channel], visualise=visualise))
 			return np.ravel(hog_features)        
 		else:
-			return self.get_hog_features(image[:,:,self.hog_channel], visualise=False)
+			return self.get_hog_features(image[:,:,self.hog_channel], visualise=visualise)
 
 	# Define a function to return HOG features and visualization
 	def get_hog_features(self, image, visualise=False):
@@ -128,7 +130,13 @@ if __name__ == '__main__':
 	from matplotlib import pyplot
 
 	# Process
-	images = glob.glob('../test_images/*')
+	vehicles_path = '../data/vehicles/**/*.png'	
+	images = glob.glob(vehicles_path)
+	image = cv2.imread(images[0])
+	image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-	image_utils = Image_Utils()
-	print(image_utils.process(images))
+	image_utils = Image_Utils(hog_channel=0)
+	# print(image_utils.process(images))
+	features, hog_image = image_utils.get_image_hog_feature(image, True)
+	pyplot.imshow(hog_image, cmap='gray')
+	pyplot.show()

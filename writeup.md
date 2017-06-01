@@ -1,8 +1,3 @@
-##Writeup Template
-###You can use this file as a template for your writeup if you want to submit it as a markdown file, but feel free to use some other method and submit a pdf if you prefer.
-
----
-
 **Vehicle Detection Project**
 
 The goals / steps of this project are the following:
@@ -31,12 +26,12 @@ The goals / steps of this project are the following:
 ## Notes:
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/513/view) Points
-###Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
+### Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
 
 ---
-###Writeup / README
+### Writeup / README
 
-####0. Code Location and Information
+#### 0. Code Location and Information
 Code can be found inside the [src directory](https://github.com/stridera/CarND-Vehicle-Detection/tree/master/src).  All code is written with functionality separated into different Classes.  All classes have code at the bottom that test the class and can be run by running the class file directly from the command line.
 
 Files are:
@@ -47,13 +42,13 @@ Files are:
 * [pipeline.py](https://github.com/stridera/CarND-Vehicle-Detection/blob/master/src/pipeline.py) - The actual pipeline which uses all the other classes to identify vehicles.
 * [get_car_location_data.py](https://github.com/stridera/CarND-Vehicle-Detection/blob/master/src/get_car_location_data.py) - A test code branch that goes through the autti and crowdui data and marks up where it discovers vehicles.  It helped determine where to have the sliding window search do its magic.
 
-####1. Provide a Writeup that includes all the rubric points and how you addressed each one.
+#### 1. Provide a Writeup that includes all the rubric points and how you addressed each one.
 
 You're reading it!
 
-###Histogram of Oriented Gradients (HOG)
+### Histogram of Oriented Gradients (HOG)
 
-####1. Explain how (and identify where in your code) you extracted HOG features from the training images.
+#### 1. Explain how (and identify where in your code) you extracted HOG features from the training images.
 
 HOG parameter extraction occurs in [Image\_Utils.py Line 84](https://github.com/stridera/CarND-Vehicle-Detection/blob/master/src/Image_Utils.py#L84).  I used the example from the class and created two paths, starting on line 73, that either allow you to stack all three channels together, or select a single channel.
 
@@ -61,11 +56,11 @@ Here is an example using the `RGB` color space and HOG parameters of `orientatio
 
 ![Hog Example Image][hog_image]
 
-####2. Explain how you settled on your final choice of HOG parameters.
+#### 2. Explain how you settled on your final choice of HOG parameters.
 
 For this part, I created an array of parameters and ran it through, marking up images.  I used some actual images hand selected from the video to ensure that they were working correctly.  This part took a while, so I let it go overnight and save the images with their parameters and outputs marked.  While my end result still isn't perfect, I have some ideas on how to improve it.  (Shown at end.)
 
-####3. Describe how (and identify where in your code) you trained a classifier using your selected HOG features (and color features if you used them).
+#### 3. Describe how (and identify where in your code) you trained a classifier using your selected HOG features (and color features if you used them).
 
 The classifier code is defined in the [Classifier](https://github.com/stridera/CarND-Vehicle-Detection/blob/master/src/Classifier.py) class.  This class is fairly simple and uses a Linear SVC classifier to attempt and identify the cars.  If set to train the data, it takes all the cars/non-cars data given in the project page, randomizes them, cuts a slice off for training, and then sends it through the image pipeline before attempting to fit it.
 
@@ -74,9 +69,9 @@ After training, we dump the trained classifier to a pickle file so we don't have
 Finally, we have a predict function that simply runs an image through the trained classifier and returns the guess.
 
 
-###Sliding Window Search
+### Sliding Window Search
 
-####1. Describe how (and identify where in your code) you implemented a sliding window search.  How did you decide what scales to search and how much to overlap windows?
+#### 1. Describe how (and identify where in your code) you implemented a sliding window search.  How did you decide what scales to search and how much to overlap windows?
 
 My first concern when implementing a window search was to figure out where the cars are usually located and the sizes of vehicles.  To figure this out, I took some of the udacity provided externally labeled data and created a heatmap of where the vehicles were labeled.  
 
@@ -103,7 +98,7 @@ As an example, I ran it through with the validator returning true for every step
 
 ![Search Window Example][search_example]
 
-####2. Show some examples of test images to demonstrate how your pipeline is working.  What did you do to optimize the performance of your classifier?
+#### 2. Show some examples of test images to demonstrate how your pipeline is working.  What did you do to optimize the performance of your classifier?
 
 Some examples
 ![Final Example 1][final_example1]
@@ -113,11 +108,11 @@ I optimized the code by using callbacks and allowing the code to dynamically val
 
 ### Video Implementation
 
-####1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (somewhat wobbly or unstable bounding boxes are ok as long as you are identifying the vehicles most of the time with minimal false positives.)
+#### 1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (somewhat wobbly or unstable bounding boxes are ok as long as you are identifying the vehicles most of the time with minimal false positives.)
 Here's a [link to my video result](./project_video-processed.mp4)
 
 
-####2. Describe how (and identify where in your code) you implemented some kind of filter for false positives and some method for combining overlapping bounding boxes.
+#### 2. Describe how (and identify where in your code) you implemented some kind of filter for false positives and some method for combining overlapping bounding boxes.
 
 In the following images, you can see the pipeline as it goes through and marks all the boxes that the classifier identifies as true.  It then creates a heatmap using those squares.  I found that a threshold of about 75 worked relatively well at clearing out the false positives and leaving me with good locations of the vehicles.  It's not the best, but it works for the first round.  I then used `scipy.ndimage.measurements.label` to mark all of the identified zones and stepped through each one and drew the final results on the image.
 
@@ -128,9 +123,9 @@ In the following images, you can see the pipeline as it goes through and marks a
 
 ---
 
-###Discussion
+### Discussion
 
-####1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
+#### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
 Issues:
 My pipeline seems to not like white cars at all.  I wanted to use more data from the kitti dataset to better train the classifier.  I have a sneaking suspicion that it's identifying dark areas as cars, and I think it's because most of the training set was dark cars.

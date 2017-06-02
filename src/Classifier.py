@@ -16,12 +16,13 @@ class Classifier:
 		self.data_path='../data/classifier.pickle'	
 
 		if image_utils is None:
+			print("Using new image utils with no options set.")
 			self.image_utils = Image_Utils()
 		else:
 			self.image_utils = image_utils
 
 		if train_data:
-			self.svc = LinearSVC()
+			self.svc = LinearSVC(C = 0.0001)
 			self.train_classifier()
 		else:
 			with open(self.data_path, "rb") as f:
@@ -40,13 +41,12 @@ class Classifier:
 
 		t=time.time()
 
-		
 		vehicles_features = self.image_utils.process(all_images)
 		t2 = time.time()
 		print(round(t2-t, 2), 'Seconds to extract HOG features...')
 
 		# Create an array stack of feature vectors
-		X = np.float64(vehicles_features)#  np.vstack((vehicles_features, non_vehicles_features)).astype(np.float64)                        
+		X = vehicles_features #np.float64(vehicles_features)#  np.vstack((vehicles_features, non_vehicles_features)).astype(np.float64)                        
 		# Fit a per-column scaler
 		X_scaler = StandardScaler().fit(X)
 		# Apply the scaler to X
@@ -56,7 +56,7 @@ class Classifier:
 		y = np.hstack((np.ones(len(vehicles)), np.zeros(len(non_vehicles))))
 
 		# Split up data into randomized training and test sets
-		rand_state = np.random.randint(0, 100)
+		rand_state = 40#np.random.randint(0, 100)
 		X_train, X_test, y_train, y_test = train_test_split(
 		    scaled_X, y, test_size=0.2, random_state=rand_state)
 

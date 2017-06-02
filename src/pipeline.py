@@ -3,6 +3,7 @@ import numpy as np
 import os.path
 from moviepy.editor import VideoFileClip
 from scipy.ndimage.measurements import label
+from collections import deque
 
 from Sliding_Window_Search import Sliding_Window_Search
 from Image_Utils import Image_Utils
@@ -16,11 +17,13 @@ class CarFindingPipeline():
 			cspace='YCrCb', 
 			hog_channel=None, 
 			spatial_size=(16, 16), 
-			hist_bins=16, 
+			hist_bins=128, 
 			orient=9, 
 			pix_per_cell=8, 
-			cell_per_block=1, 
-			feature_vec=True
+			cell_per_block=2, 
+			feature_vec=True,
+			use_spatial=False,
+			use_histogram=True
 		)
 		self.classifier = Classifier(train_classifier, image_utils=self.iu)
 		self.sws = Sliding_Window_Search(
@@ -36,12 +39,13 @@ class CarFindingPipeline():
 		self.search_window_set = False
 		self.image_number = 0
 		self.squares = []
-		self.heatmap = None
+		self.heatmap_queue = deque(maxlen = 5)
+
 
 	def reset(self):
 		self.image_number = 0
 		self.squares = []
-		self.heatmap = None
+		self.heatmap_queue = deque(maxlen = 5)	
 
 	def update_search_window(self, search_window):
 		self.sws.set_search_window(search_window)
@@ -91,7 +95,7 @@ class CarFindingPipeline():
 		# pyplot.show()
 		if not self.search_window_set:
 			search_window = (
-				(0, frame.shape[0] * 0.35), 
+				(0, frame.shape[0] * 0.45), 
 				(frame.shape[1], frame.shape[0] * 0.95)
 			)
 			self.update_search_window(search_window)
@@ -112,16 +116,17 @@ class CarFindingPipeline():
 		for square in self.squares:
 			tl, br = square
 			heat[br[1]:tl[1], tl[0]:br[0]] += 1
-		heat[heat <= 75] = 0
-		self.heatmap = np.clip(heat, 0, 255)
-		return self.heatmap
+		heat[heat <= 50] = 0
+		self.heatmap_queue.append(np.clip(heat, 0, 255))
+		return np.average(self.heatmap_queue, axis=0)
 
 	def draw_overlay_using_heatmap(self, image):
 		final = np.copy(image)
-		heatmap = self.heatmap
-		if self.heatmap is None:
+		if self.heatmap_queue is None:
 			heatmap = self.generage_heat_map(image)
 		
+		heatmap = np.average(self.heatmap_queue)
+
 		zeros = np.zeros_like(heatmap)
 		heatmap3 = cv2.merge((zeros, zeros, heatmap))
 
@@ -130,9 +135,9 @@ class CarFindingPipeline():
 
 	def draw_overlay_using_heatmap_labels(self, image):
 		final = np.copy(image)
-		heatmap = self.heatmap
-		if self.heatmap is None:
-			heatmap = self.generage_heat_map(image)
+		if not self.heatmap_queue:
+			self.generage_heat_map(image)
+		heatmap = np.average(self.heatmap_queue, axis=0)
 
 		labels = label(heatmap)
 
@@ -168,7 +173,7 @@ def processTestImages():
 
 	images = glob.glob('../test_images/*')
 
-	pipeline = CarFindingPipeline()
+	pipeline = CarFindingPipeline(True)
 
 	cols = len(images)
 	for i, imgPath in enumerate(images):
@@ -179,7 +184,7 @@ def processTestImages():
 		# rgb_image = mpimg.imread(imgPath)
 
 		search_window = (
-			(0, rgb_image.shape[0] * 0.35), 
+			(0, rgb_image.shape[0] * 0.45), 
 			(rgb_image.shape[1], rgb_image.shape[0] * 0.95))
 
 		pipeline.update_search_window(search_window)

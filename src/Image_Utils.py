@@ -8,7 +8,7 @@ import tqdm
 
 class Image_Utils():
 	def __init__(self, cspace='YCrCb', hog_channel=None, spatial_size=(32, 32), hist_bins=32, 
-			orient=9, pix_per_cell=8, cell_per_block=3, feature_vec=True):
+			orient=9, pix_per_cell=8, cell_per_block=3, feature_vec=True, use_spatial=True, use_histogram=True):
 		self.cspace = cspace
 		self.hog_channel = hog_channel
 		self.spatial_size = spatial_size
@@ -17,6 +17,9 @@ class Image_Utils():
 		self.pix_per_cell=pix_per_cell
 		self.cell_per_block=cell_per_block
 		self.feature_vec=feature_vec
+		self.use_spatial = use_spatial
+		self.use_histogram = use_histogram
+
 
 	def process(self, images):
 		if isinstance(images, list):
@@ -49,11 +52,14 @@ class Image_Utils():
 		return self.get_image_features(color_converted_image)
 
 	def get_image_features(self, image):
-		hog_features = self.get_image_hog_feature(image)
-		spatial_features = self.get_bin_spatial_features(image)        
-		histogram_features = self.get_histogram_features(image)
+		features = []
+		features.append(self.get_image_hog_feature(image))
+		if self.use_spatial:
+			features.append(self.get_bin_spatial_features(image))
+		if self.use_histogram:
+			features.append(self.get_histogram_features(image))
 
-		return np.concatenate((hog_features, spatial_features, histogram_features), axis=0)
+		return np.concatenate(features, axis=0)
 
 	def convert_color_space(self, image):
 		# apply color conversion if other than 'RGB'
@@ -72,8 +78,6 @@ class Image_Utils():
 
 	def get_image_hog_feature(self, image, visualise=False):
 		# Call get_hog_features() with vis=False, feature_vec=True
-		print("Hog Channel:", self.hog_channel)
-
 		if self.hog_channel is None:
 			hog_features = []
 			for channel in range(image.shape[2]):
@@ -90,7 +94,7 @@ class Image_Utils():
 				orientations=self.orient, 
 				pixels_per_cell=(self.pix_per_cell, self.pix_per_cell),
 				cells_per_block=(self.cell_per_block, self.cell_per_block), 
-				transform_sqrt=False, 
+				transform_sqrt=True, 
 				visualise=True, 
 				block_norm='L2-Hys',
 				feature_vector=self.feature_vec)
@@ -100,7 +104,7 @@ class Image_Utils():
 				orientations=self.orient, 
 				pixels_per_cell=(self.pix_per_cell, self.pix_per_cell),
 				cells_per_block=(self.cell_per_block, self.cell_per_block), 
-				transform_sqrt=False, 
+				transform_sqrt=True, 
 				visualise=False, 
 				block_norm='L2-Hys',
 				feature_vector=self.feature_vec)

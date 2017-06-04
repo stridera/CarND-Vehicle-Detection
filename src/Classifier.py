@@ -3,6 +3,8 @@ import cv2
 import glob
 import time
 from sklearn.svm import LinearSVC
+from sklearn.neural_network import MLPClassifier
+
 from sklearn.preprocessing import StandardScaler
 from skimage.feature import hog
 from Image_Utils import Image_Utils
@@ -22,7 +24,8 @@ class Classifier:
 			self.image_utils = image_utils
 
 		if train_data:
-			self.svc = LinearSVC(C = 0.0001)
+			# self.svc = LinearSVC(C=0.0001)
+			self.svc = MLPClassifier()
 			self.train_classifier()
 		else:
 			with open(self.data_path, "rb") as f:
@@ -38,6 +41,8 @@ class Classifier:
 		non_vehicles = glob.glob(non_vehicles_path)
 
 		all_images = vehicles + non_vehicles
+
+		print("Training with ", len(vehicles), 'vehicles and', len(non_vehicles), "non-vehicles", len(all_images), 'total')
 
 		t=time.time()
 
@@ -95,27 +100,6 @@ def test_full_validation(train=False):
 	non_vehicles = glob.glob(non_vehicles_path)
 			
 	image_utils = Image_Utils()
-	# vehicle_image = image_utils.extract_features_from_image(mpimg.imread(vehicles[10]), hog_channel=0)
-	# non_vehicle_image = image_utils.extract_features_from_image(mpimg.imread(non_vehicles[10]), hog_channel=0)
-	
-	#sample_size = 1000
-	#vehicles = vehicles[0:sample_size]
-	#non_vehicles = non_vehicles[0:sample_size]
-
-	# non_vehicle_features = []
-	# for image in non_vehicles:
-	# 	non_vehicle_features.append(image_utils.extract_features_from_image(mpimg.imread(image)))
-
-	# vehicle_features = []
-	# for image in vehicles:
-	# 	vehicle_features.append(image_utils.extract_features_from_image(mpimg.imread(image)))
-
-
-
-	# X = np.vstack((vehicle_features, non_vehicle_features)).astype(np.float64)   
-
-	# vehicles = vehicles[:100]
-	# non_vehicles = non_vehicles[:100]
 
 	X = image_utils.process(vehicles + non_vehicles)
 	y = np.hstack((np.ones(len(vehicles)), np.zeros(len(non_vehicles))))
@@ -131,12 +115,6 @@ def try_test_images():
 	vehicles_path = '../test_images_2/*.png'
 	vehicles = glob.glob(vehicles_path)
 	vehicle_features = image_utils.process(vehicles)
-	# vehicle_features = []
-	# for image_path in vehicles:
-		# image = mpimg.imread(image_path)
-		# pyplot.imshow(image)
-		# pyplot.show()
-		# vehicle_features.append(image_utils.process(image))
 
 	predictions = classifier.predict(vehicle_features)
 	for i, p in enumerate(predictions):

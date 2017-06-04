@@ -64,6 +64,8 @@ class Image_Utils():
 	def convert_color_space(self, image):
 		# apply color conversion if other than 'RGB'
 		if self.cspace != 'RGB':
+			if self.cspace == 'Gray':
+				image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
 			if self.cspace == 'HSV':
 				image = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
 			elif self.cspace == 'LUV':
@@ -78,7 +80,9 @@ class Image_Utils():
 
 	def get_image_hog_feature(self, image, visualise=False):
 		# Call get_hog_features() with vis=False, feature_vec=True
-		if self.hog_channel is None:
+		if self.cspace == 'Gray':
+			return self.get_hog_features(image, visualise=visualise)
+		elif self.hog_channel is None:
 			hog_features = []
 			for channel in range(image.shape[2]):
 				hog_features.append(self.get_hog_features(image[:,:,channel], visualise=visualise))
@@ -117,6 +121,9 @@ class Image_Utils():
 		return np.hstack((color1, color2, color3))
 							
 	def get_histogram_features(self, image):    #bins_range=(0, 256)
+		if self.cspace == 'Gray':
+			return np.histogram(image, bins=self.hist_bins)
+
 		# Compute the histogram of the color channels separately
 		channel1_hist = np.histogram(image[:,:,0], bins=self.hist_bins)
 		channel2_hist = np.histogram(image[:,:,1], bins=self.hist_bins)

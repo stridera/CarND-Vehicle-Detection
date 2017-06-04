@@ -15,7 +15,6 @@ class Sliding_Window_Search():
 		self.validator = validator
 		self.on_valid = on_valid
 		self.on_invalid = on_invalid
-		self.window = 0
 		self.extra_params = extra_params
 
 	def set_search_window(self, search_window):
@@ -61,8 +60,6 @@ class Sliding_Window_Search():
 			# print(x1, x2, y1, y2, cropped_image.shape, image.shape)
 			if self.validator(cropped_image):
 				if self.on_valid is not None:
-					self.window += 1
-					i = self.window
 					image =  self.on_valid(image, cropped_image, top_left, bottom_right, **self.extra_params)
 			else:
 				if self.on_invalid is not None:

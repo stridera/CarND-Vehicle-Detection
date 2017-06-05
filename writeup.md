@@ -62,7 +62,7 @@ For this part, I created an array of parameters and ran it through, marking up i
 
 #### 3. Describe how (and identify where in your code) you trained a classifier using your selected HOG features (and color features if you used them).
 
-The classifier code is defined in the [Classifier](https://github.com/stridera/CarND-Vehicle-Detection/blob/master/src/Classifier.py) class.  This class is fairly simple and uses a Linear SVC classifier to attempt and identify the cars.  If set to train the data, it takes all the cars/non-cars data given in the project page, randomizes them, cuts a slice off for training, and then sends it through the image pipeline before attempting to fit it.
+The classifier code is defined in the [Classifier](https://github.com/stridera/CarND-Vehicle-Detection/blob/master/src/Classifier.py) class.  This class is fairly simple and uses a -Linear SVC- MLPClassifier classifier to attempt and identify the cars.  If set to train the data, it takes all the cars/non-cars data given in the project page, randomizes them, cuts a slice off for training, and then sends it through the image pipeline before attempting to fit it.
 
 After training, we dump the trained classifier to a pickle file so we don't have to train it every time.
 
@@ -114,7 +114,7 @@ Here's a [link to my video result](./project_video-processed.mp4)
 
 #### 2. Describe how (and identify where in your code) you implemented some kind of filter for false positives and some method for combining overlapping bounding boxes.
 
-In the following images, you can see the pipeline as it goes through and marks all the boxes that the classifier identifies as true.  It then creates a heatmap using those squares.  I found that a threshold of about 75 worked relatively well at clearing out the false positives and leaving me with good locations of the vehicles.  It's not the best, but it works for the first round.  I then used `scipy.ndimage.measurements.label` to mark all of the identified zones and stepped through each one and drew the final results on the image.
+In the following images, you can see the pipeline as it goes through and marks all the boxes that the classifier identifies as true.  It then creates a heatmap using those squares.  I found that a threshold of about 75 worked relatively well at clearing out the false positives and leaving me with good locations of the vehicles.  It's not the best, but it works for the first round.  To smooth it out, I took a queue of the last 25 frames (about one second video time) and averaged them out.  I then used `scipy.ndimage.measurements.label` to mark all of the identified zones and stepped through each one and drew the final results on the image.
 
 ![Pipeline Example 1][pipeline_example1]
 ![Pipeline Example 2][pipeline_example2]
